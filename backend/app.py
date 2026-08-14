@@ -149,7 +149,7 @@ def search_arcgis_candidates(query: str) -> list[dict]:
 # =====================================================================
 
 # Check boundary inclusion (Ray casting using shapely)
-#is_point_in_taipei：使用shapely
+#is_point_in_taipei：使用shapely套件進行放射線法。利用台北市外圍座標建立多邊形 Polygon，並檢查經緯度點 Point(lon, lat) 是否落在市內。若邊界圖資缺失，則退回簡單框線範圍檢查。
 def is_point_in_taipei(lat: float, lon: float, boundary_coords: dict) -> bool:
     if not boundary_coords or not boundary_coords.get("exterior"):
         return 24.95 <= lat <= 25.22 and 121.45 <= lon <= 121.67
@@ -157,6 +157,7 @@ def is_point_in_taipei(lat: float, lon: float, boundary_coords: dict) -> bool:
     return poly.contains(Point(lon, lat))
 
 # Helper to map vehicle keys
+#建立一個運具字典
 VEHICLE_MAP = {
     "捷運 (MRT)": "mrt",
     "火車 (Train)": "train",
@@ -169,10 +170,13 @@ VEHICLE_MAP = {
 }
 
 # Initialize session state for geocoding candidate lists & selections
+# st.session_state： Streamlit 的跨跨頁/刷新狀態儲存區。
+#初始化 "origin_candidates" 這個字典，因為記憶體中沒有"origin_candidates"這個key所以給予他一個空列表
 if "origin_candidates" not in st.session_state:
     st.session_state["origin_candidates"] = []
 if "destination_candidates" not in st.session_state:
     st.session_state["destination_candidates"] = []
+#在這裡預先初始化起點/終點的搜尋候選名單，並設定預設起點（台北車站）與終點（台北101)
 if "origin_selected" not in st.session_state:
     st.session_state["origin_selected"] = {"lat": 25.0478, "lon": 121.5319, "label": "臺北車站 (預設)"}
 if "destination_selected" not in st.session_state:
@@ -182,6 +186,7 @@ if "destination_selected" not in st.session_state:
 st.sidebar.markdown("### 📋 1. 設定起迄位置")
 
 # --- Origin geocoder ---
+#使用者輸入關鍵字後點擊「🔍 搜尋起點」，呼叫 API 並將候選結果存入 st.session_state["origin_candidates"]。
 origin_query = st.sidebar.text_input("搜尋起點 (Origin)", value="", placeholder="輸入起點關鍵字，如：台北車站")
 col_s1, col_c1 = st.sidebar.columns([1, 1])
 with col_s1:
@@ -198,7 +203,8 @@ with col_s1:
 with col_c1:
     if st.button("❌ 清除起點結果"):
         st.session_state["origin_candidates"] = []
-
+#若有候選地址，會動態跳出 selectbox（下拉選單）讓使用者點選精確地址。
+#選定後，將座標與標籤更新至 st.session_state["origin_selected"] 並顯示目前綠色起點狀態
 if st.session_state["origin_candidates"]:
     orig_labels = [c["address"] for c in st.session_state["origin_candidates"]]
     selected_orig = st.sidebar.selectbox("請選擇確切起點候選地址：", options=orig_labels, key="origin_selectbox")
@@ -241,10 +247,12 @@ if st.session_state["destination_candidates"]:
     }
 st.sidebar.markdown(f"<div class='status-msg'>🔴 終點：{st.session_state['destination_selected']['label']}</div>", unsafe_allow_html=True)
 
+#=======================================================================================================================
+#側邊攔：個人屬性、心情場景及運具選擇
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 👤 2. 個人身分屬性 (安全與票價計算)")
 age = st.sidebar.slider("年齡 (Age)", min_value=0, max_value=110, value=30)
-gender = st.sidebar.selectbox("性別 (Gender)", options=["男性", "女性", "其他"], index=0)
+gender = st.sidebar.selectbox("性別 (Gender)", options=["男性", "女性"], index=0)
 weight = st.sidebar.slider("體重 (Weight - kg)", min_value=30, max_value=150, value=60)
 
 st.sidebar.markdown("---")
