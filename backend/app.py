@@ -1,7 +1,8 @@
-import os
-import streamlit as st
-import folium
-from streamlit_folium import st_folium
+#匯入套件與模組
+import os   #python標準庫，處理作業系統相關操作
+import streamlit as st  #匯入streamlit套件，建立互動式web前端互動介面
+import folium           #繪製互動式地圖(e.g.畫標記、路線圖層等)
+from streamlit_folium import st_folium   #將folium地圖元件
 import requests
 from shapely.geometry import Point, Polygon
 
