@@ -1,27 +1,31 @@
+#app.py這個檔案只負責前端介面與資料傳遞，細項資訊應該都放在backend目錄下的各檔案裡
 #匯入套件與模組
 import os   #python標準庫，處理作業系統相關操作
 import streamlit as st  #匯入streamlit套件，建立互動式web前端互動介面
 import folium           #繪製互動式地圖(e.g.畫標記、路線圖層等)
 from streamlit_folium import st_folium   #將folium地圖元件
-import requests
-from shapely.geometry import Point, Polygon
+import requests   #呼叫ArcGIS地理編碼(地址轉經緯度)用
+from shapely.geometry import Point, Polygon  #幾何運算(在此用於判別經緯度是否位於台北市多邊形內)
 
-from backend.config import get_settings
-from backend.routing.graph import build_graphs
-from backend.routing.routing import RouteRequestData, recommend_routes, parse_place
-from backend.ai.gemini import get_gemini_weights
-from backend.api.weather import fetch_district_weather_snapshot, WeatherSnapshot
-from backend.utils.gis_helper import get_all_stations, get_taipei_boundary_coords, get_district_by_coords
+#自訂後端模組匯入邏輯
+from backend.config import get_settings       #get_settings：讀取系統設定
+from backend.routing.graph import build_graphs  #build_graphs：載入路網圖資
+from backend.routing.routing import RouteRequestData, recommend_routes, parse_place  #RouteRequestData, recommend_routes, parse_place：路徑規劃資料結構與核心推薦演算法
+from backend.ai.gemini import get_gemini_weights   #get_gemini_weights：呼叫gemini將使用者心情轉換為路徑選擇的權重
+from backend.api.weather import fetch_district_weather_snapshot, WeatherSnapshot   #fetch_district_weather_snapshot, WeatherSnapshot：抓取特定行政區氣象及空氣品質資料
+from backend.utils.gis_helperget_all_stations, get_taipei_boundary_coords, get_district_by_coords
+# import get_all_stations, get_taipei_boundary_coords, get_district_by_coords：GIS 工具，用來取得車站清單、台北市邊界座標，以及根據經緯度查詢所屬行政區
 
-# Set page config
+# Set page config 網頁基本設定與CSS(控制網頁外觀與排版的電腦語言)樣式美化
 st.set_page_config(
     page_title="臺北市大眾運輸同理心路線推薦系統",
     page_icon="🚇",
-    layout="wide",
+    layout="wide",   #寬螢幕模式
     initial_sidebar_state="expanded"
 )
 
 # Custom Alice Blue & Glassmorphism Styling
+#寫入自訂 CSS 樣式，採用 毛玻璃風格 (Glassmorphism) 與淡藍/愛麗絲藍配色（Alice Blue），用來美化主標題、卡片、天氣標籤與狀態文字。
 st.markdown(
     """
     <style>
@@ -90,14 +94,14 @@ st.markdown(
 # =====================================================================
 # ⚡️ 【效能優化區：Streamlit 記憶體快取】 (Server Warmup Cache)
 # =====================================================================
-@st.cache_resource
-def load_cached_networks():
+@st.cache_resource               #Streamlit 的裝飾器（Decorator），用於快取消耗大量 CPU/記憶體的全局資源
+def load_cached_networks():      #呼叫 build_graphs() 建立並回傳路網圖
     """Load cached road/transit network graphs and prebuild routing tables once."""
     st.write("🔧 正在初始化臺北市路網圖資並預建路由表 (僅在首次啟動時執行)...")
     return build_graphs()
 
 @st.cache_resource
-def load_cached_gis():
+def load_cached_gis():  #讀取所有車站資訊與回傳路網圖
     """Load shapefiles for stations and city boundary boundaries once."""
     stations = get_all_stations()
     boundary = get_taipei_boundary_coords()
@@ -105,10 +109,13 @@ def load_cached_gis():
 # =====================================================================
 
 # Trigger startup resource loading
+#執行上述函數，將載入後的路網 (graphs)、車站 (stations) 和邊界 (boundary) 存在記憶體中備用
 graphs = load_cached_networks()
 stations, boundary = load_cached_gis()
 
 # Address Geocoder using Esri ArcGIS World Geocoding Service (Robust on Cloud Platforms)
+#地理編碼（地址轉經緯度）
+#search_arcgis_candidates：使用 Esri ArcGIS 免費 API 將地名轉為經緯度
 def search_arcgis_candidates(query: str) -> list[dict]:
     """Search addresses using Esri ArcGIS Geocoder (not rate-limited or blocked on AWS cloud)."""
     full_query = query if any(k in query for k in ["台北", "臺北"]) else f"台北市 {query}"
@@ -116,7 +123,7 @@ def search_arcgis_candidates(query: str) -> list[dict]:
     params = {
         "f": "json",
         "singleLine": full_query,
-        "maxLocations": 6,
+        "maxLocations": 6,  #只抓取最多6個結果
         "outFields": "Addr_type"
     }
     try:
@@ -127,8 +134,8 @@ def search_arcgis_candidates(query: str) -> list[dict]:
             for c in data.get("candidates", []):
                 lat = float(c["location"]["y"])
                 lon = float(c["location"]["x"])
-                # Bounding box filter for Taipei City to ensure relevant results
-                if 24.95 <= lat <= 25.22 and 121.45 <= lon <= 121.67:
+                # Bounding box filter for Taipei City to ensure relevant results，建立台北市概略邊界盒
+                if 24.95 <= lat <= 25.22 and 121.45 <= lon <= 121.67:    #建立經緯度篩選條件
                     candidates.append({
                         "address": c["address"],
                         "lat": lat,
@@ -139,7 +146,10 @@ def search_arcgis_candidates(query: str) -> list[dict]:
         st.error(f"ArcGIS 搜尋失敗: {e}")
     return []
 
+# =====================================================================
+
 # Check boundary inclusion (Ray casting using shapely)
+#is_point_in_taipei：使用shapely
 def is_point_in_taipei(lat: float, lon: float, boundary_coords: dict) -> bool:
     if not boundary_coords or not boundary_coords.get("exterior"):
         return 24.95 <= lat <= 25.22 and 121.45 <= lon <= 121.67
