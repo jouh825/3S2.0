@@ -203,6 +203,7 @@ with col_s1:
 with col_c1:
     if st.button("❌ 清除起點結果"):
         st.session_state["origin_candidates"] = []
+        
 #若有候選地址，會動態跳出 selectbox（下拉選單）讓使用者點選精確地址。
 #選定後，將座標與標籤更新至 st.session_state["origin_selected"] 並顯示目前綠色起點狀態
 if st.session_state["origin_candidates"]:
@@ -253,7 +254,7 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("### 👤 2. 個人身分屬性 (安全與票價計算)")
 age = st.sidebar.slider("年齡 (Age)", min_value=0, max_value=110, value=30)
 gender = st.sidebar.selectbox("性別 (Gender)", options=["男性", "女性"], index=0)
-weight = st.sidebar.slider("體重 (Weight - kg)", min_value=30, max_value=150, value=60)
+weight = st.sidebar.slider("體重 (Weight - kg)", min_value=30, max_value=200, value=60) #滑桿最小值、最大值與預設值
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 💡 3. 心情與出行場景 (AI 智能語意分析)")
@@ -292,6 +293,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
             dest_name = st.session_state["destination_selected"]["label"]
             
             # Check Taipei bounds ray-casting precision inclusion
+            #檢查地點是否在台北市內
             orig_in = is_point_in_taipei(orig_lat, orig_lon, boundary)
             dest_in = is_point_in_taipei(dest_lat, dest_lon, boundary)
             
@@ -299,8 +301,9 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                 st.error("超出範圍！您選擇的位置位於臺北市境外，請重新輸入並搜尋。")
                 st.write(f"起點: {orig_name} ({'台北市內' if orig_in else '境外'})")
                 st.write(f"終點: {dest_name} ({'台北市內' if dest_in else '境外'})")
-            else:
+            else:  #抓取氣象資料
                 # Fetch district-level CWA Weather & AQI
+                #根據經位度便是所述行政區，並向氣象數api抓取該地即時天氣及空氣品質
                 orig_district = get_district_by_coords(orig_lat, orig_lon)
                 dest_district = get_district_by_coords(dest_lat, dest_lon)
                 
@@ -308,6 +311,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                 dest_weather = fetch_district_weather_snapshot(dest_district)
                 
                 # Display weather badges
+                #畫面上以雙欄式（st.columns(2)）毛玻璃卡片印出起點與終點的溫度、天氣描述與 AQI 數值
                 col_weather1, col_weather2 = st.columns(2)
                 with col_weather1:
                     st.markdown(
