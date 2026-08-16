@@ -1,4 +1,5 @@
 # backend/ai/prompt.py
+#ai提示詞設定中心
 
 SYSTEM_PROMPT = """
 你是一個專業的「智慧交通路線偏好演算法」核心參數生成器。
