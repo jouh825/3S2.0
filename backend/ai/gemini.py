@@ -1,4 +1,5 @@
 # backend/ai/gemini.py
+#套進引入
 import json
 import logging
 from typing import Dict, Any
@@ -72,7 +73,7 @@ def get_gemini_weights(user_input: str, weather: str, profile: str) -> dict:
     # Parse profile text back to dict if needed, or pass as is
     profile_dict = {"profile_text": profile}
     return get_route_weights(user_input, profile_dict, weather)
-
+#資料正規化
 def normalize_ai_result(result: dict) -> dict:
     """Ensure Gemini output has all expected routing fields."""
     normalized = DEFAULT_AI_RESULT.copy()
