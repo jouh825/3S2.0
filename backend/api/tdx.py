@@ -1,3 +1,4 @@
+#模組引入與token快取
 import os
 import requests
 from typing import Optional
@@ -38,7 +39,8 @@ def get_tdx_access_token() -> Optional[str]:
         print(f"❌ Error authenticating with TDX: {e}")
         
     return None
-
+    
+#即時火車等候時間查詢。根據傳入的車站名稱（預設為 "台北"），查詢下一班列車還要等幾分鐘
 def get_next_train_wait_minutes(station_name: str = "台北") -> float:
     """
     Query the next train arrival time from TDX API.
