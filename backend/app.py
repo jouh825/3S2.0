@@ -348,12 +348,13 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                 )
                 
                 routes = recommend_routes(req_data)
-                
+
+                #結果展示區(左地圖、右推薦卡片)
                 if not routes:
                     st.info("ℹ️ 在目前設定與路網約束下，未找到可抵達的路線推薦。")
                 else:
                     # Split Layout for Map and Cards
-                    col_map, col_details = st.columns([3, 2])
+                    col_map, col_details = st.columns([3, 2])  #3:2分割左右兩欄
                     
                     # Left side: Interactive Folium Map
                     with col_map:
@@ -363,6 +364,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                         m = folium.Map(location=[center_lat, center_lon], zoom_start=13)
                         
                         # Draw Taipei boundary
+                        #繪製台北市多邊形遮罩
                         if boundary and boundary.get("exterior"):
                             folium.Polygon(
                                 locations=boundary["exterior"],
@@ -373,7 +375,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                                 fill_opacity=0.08,
                                 tooltip="臺北市邊界"
                             ).add_to(m)
-                            
+                        #繪製推薦路線軌跡
                         route_colors = ["#0284c7", "#f59e0b", "#10b981"]
                         
                         for idx, r in enumerate(routes):
@@ -387,7 +389,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                                 tooltip=f"推薦路線 {idx+1} ({r['vehicle']})"
                             ).add_to(m)
                             
-                            # Add boarding/alighting stations
+                            # Add boarding/alighting stations #若包含大眾交通工具則標記上下車點
                             if r.get("board_station"):
                                 bs = r["board_station"]
                                 folium.Marker(
@@ -436,6 +438,7 @@ if st.sidebar.button("🚗 開始規劃路線", type="primary"):
                         st_folium(m, width=700, height=520, returned_objects=[])
                         
                     # Right side: Empathetic AI feedback & route cards
+                    #顯示ai所建議的文字
                     with col_details:
                         st.markdown("### 💬 AI 同理心小建議")
                         ai_commentary = ai_result.get("recommendation", "根據您的情況與當前天氣，我們已為您規畫了最合適的移動方案。")
