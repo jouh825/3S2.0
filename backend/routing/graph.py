@@ -14,6 +14,7 @@ from backend.routing.walking_speed import calculate_walk_speed, fare_identity
 # =====================================================================
 # 🛡️ 【使用者自訂區域：各運具之環境安全係數】 (User-modifiable Safety Coefficients)
 # =====================================================================
+#環境風險敏感加權係數：定義不同運具對安全風險（如路燈明亮度、治安/事故率）的敏感程度，分數越高表越相對不安全
 SAFETY_COEFFICIENTS = {
     "walking": 1.0,        # 步行安全敏感係數
     "walk": 1.0,
