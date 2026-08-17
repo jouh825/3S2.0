@@ -324,41 +324,41 @@ def inject_drive_edges(graph: nx.MultiDiGraph, identity: str) -> None:
         elif highway == "trunk":
             car_speed = 65.0
         elif highway == "primary":
-            car_speed = 45.0
+            car_speed = 48.66
         elif highway == "secondary":
-            car_speed = 35.0
+            car_speed = 37.86
         elif highway == "tertiary":
-            car_speed = 30.0
+            car_speed = 32.44
         elif highway in ["residential", "unclassified"]:
-            car_speed = 18.0
+            car_speed = 19.46
         elif highway in ["living_street", "service"]:
-            car_speed = 10.0
+            car_speed = 10.81
         else:
-            car_speed = 15.0
+            car_speed = 16.22
             
         if highway == "primary":
-            scooter_speed = 40.0
+            scooter_speed = 47.25
         elif highway == "secondary":
-            scooter_speed = 35.0
+            scooter_speed = 41.34
         elif highway == "tertiary":
-            scooter_speed = 30.0
+            scooter_speed = 35.44
         elif highway in ["residential", "unclassified"]:
-            scooter_speed = 20.0
+            scooter_speed = 23.63
         elif highway in ["living_street", "service"]:
-            scooter_speed = 12.0
+            scooter_speed = 14.18
         else:
-            scooter_speed = 15.0
+            scooter_speed = 17.72
             
         taxi_speed = car_speed
         
         if highway == "primary":
-            bus_speed = 25.0
+            bus_speed = 34.18
         elif highway == "secondary":
-            bus_speed = 20.0
+            bus_speed = 27.34
         elif highway in ["tertiary", "residential", "unclassified"]:
-            bus_speed = 15.0
+            bus_speed = 20.51
         else:
-            bus_speed = 10.0
+            bus_speed = 13.67
             
         data["pure_time_car"] = seconds_by_speed(length_m, car_speed)
         data["pure_fare_car"] = length_km * 3.5
@@ -378,10 +378,10 @@ def inject_rail_edges(graph: nx.MultiDiGraph, identity: str, wait_table: dict) -
     for _, _, _, data in graph.edges(data=True, keys=True):
         length_m = float(data.get("length", 1.0))
         length_km = length_m / 1000.0
-        run_time_mrt = seconds_by_speed(length_m, 31.43)
+        run_time_mrt = seconds_by_speed(length_m, 39.47)
         data["pure_time_mrt"] = run_time_mrt + match_mrt_wait_seconds(data, wait_table)
         data["pure_fare_mrt"] = mrt_fare(length_km, identity)
-        data["pure_time_train"] = seconds_by_speed(length_m, 40.0)
+        data["pure_time_train"] = seconds_by_speed(length_m, 50.00)
         data["pure_fare_train"] = train_fare(length_km, identity)
 
 
@@ -396,13 +396,10 @@ def inject_walk_edges(
         data["pure_time_walk"] = seconds_by_speed(length_m, walk_speed)
         
         # Use precalculated bike speed (avoiding Newton iterations)
-        bike_ms = float(data.get("precalc_bike_speed", 3.0))
+        bike_ms = 12.0 * 1000 / 3600
         data["pure_time_youbike"] = length_m / bike_ms
         data["pure_fare_walk"] = 0.0
         data["pure_fare_youbike"] = ubike_fare(data["pure_time_youbike"] / 60.0, identity)
-
-
-
 
 
 def seconds_by_speed(length_m: float, speed_kmh: float) -> float:
@@ -440,7 +437,7 @@ def build_demo_graphs() -> RoutingGraphs:
     
     # Precalculate bike speed for walk demo graph
     for _, _, data in walk.edges(data=True):
-        data["precalc_bike_speed"] = 3.0
+        data["precalc_bike_speed"] = 12.0 * 1000 / 3600
         
     return RoutingGraphs(drive=drive, rail=rail, walk=walk)
 
