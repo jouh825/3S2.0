@@ -29,7 +29,7 @@ SAFETY_COEFFICIENTS = {
     "taxi": 0.5,           # 計程車安全敏感係數
 }
 # =====================================================================
-
+#資料結構容器
 @dataclass
 class RoutingGraphs:
     """Container for Taipei multimodal graphs."""
@@ -38,7 +38,8 @@ class RoutingGraphs:
     walk: nx.MultiDiGraph
     di_graphs: dict[str, nx.DiGraph] = None
 
-
+#主建置與快取機制
+#build_graphs()為整個圖形建立流程的總指揮，首先想優先快取(load_cached_graphs)
 def build_graphs() -> RoutingGraphs:
     """Load cached graphs or build Taipei graphs with the notebook method."""
     settings = get_settings()
@@ -50,7 +51,7 @@ def build_graphs() -> RoutingGraphs:
         demo = build_demo_graphs()
         prebuild_all_di_graphs(demo)
         return demo
-    try:
+    try:  #若允許下載，則透過 download_osmnx_graphs 從網路上下載地圖並儲存至快取
         graphs = download_osmnx_graphs(settings.taipei_center, settings.search_dist_m)
         save_cached_graphs(graphs, settings.graph_cache_dir)
         prebuild_all_di_graphs(graphs)
@@ -110,7 +111,8 @@ def save_cached_graphs(graphs: RoutingGraphs, cache_dir: Path) -> None:
     except Exception as e:
         print(f"[Error] Failed to save GraphML cache: {e}")
 
-
+#===================================================================================================
+#download_osmnx_graphs()：使用 osmnx 以指定座標與半徑為中心，下載車行、軌道（捷運、台鐵、輕軌）與步行網路，並確保圖形的連通性與 YouBike 速度預算。
 def download_osmnx_graphs(center: tuple[float, float], dist: int) -> RoutingGraphs:
     """Build Taipei graphs using the notebook's OSMnx graph_from_point calls."""
     import networkx as nx_local
@@ -131,13 +133,16 @@ def download_osmnx_graphs(center: tuple[float, float], dist: int) -> RoutingGrap
     
     return RoutingGraphs(drive=drive, rail=rail, walk=walk)
 
+#=======================================================================================================
 
+#keep_largest_strong_component()：取圖中「最大強連通分量（Strongly Connected Component）」，剔除無法互通的孤立斷頭路與離島節點，確保後續算路時不會發生無路可通的例外
 def keep_largest_strong_component(graph: nx.MultiDiGraph, nx_module: Any = nx) -> nx.MultiDiGraph:
     """Keep the largest strongly connected component, matching the notebook."""
     nodes = max(nx_module.strongly_connected_components(graph), key=len)
     return graph.subgraph(nodes).copy()
 
-
+#============================================================================================
+#precalculate_bike_speeds()：根據道路階層（自行車道、住宅區道路等）預先設定 YouBike 速度並轉換為公尺/秒 ($m/s$)，將其存入邊資料中。
 def precalculate_bike_speeds(graph: nx.MultiDiGraph) -> None:
     """Assign YouBike speed based on OSM highway tag (Heuristic Speed Table)."""
     for _, _, _, data in graph.edges(data=True, keys=True):
@@ -155,8 +160,9 @@ def precalculate_bike_speeds(graph: nx.MultiDiGraph) -> None:
             
         # Store in meters per second
         data["precalc_bike_speed"] = speed_kmh * 1000 / 3600
-
-
+#=================================================================================
+#prebuild_all_di_graphs()：將屬性注入邊上，並把複雜的 MultiDiGraph 簡化並展平為輕量級的 DiGraph，同時依據不同時段（尖峰、離峰、深夜）建置對應的捷運/台鐵路網
+#?????????????????????????????????????????????????????????????????????
 def prebuild_all_di_graphs(graphs: RoutingGraphs) -> None:
     """Pre-build simple DiGraphs for all vehicles to completely bypass request-time loops."""
     print("=== [Warmup] Pre-building multimodal DiGraphs for fast routing ===")
@@ -197,7 +203,8 @@ def prebuild_all_di_graphs(graphs: RoutingGraphs) -> None:
         
     print(f"=== [Warmup] Pre-building complete! {len(graphs.di_graphs)} routing tables loaded ===")
 
-
+#===================================================================================================================
+#build_mode_digraph()：將多重邊圖形轉為單一最佳邊圖形
 def build_mode_digraph(graph: nx.MultiDiGraph, mode: str) -> nx.DiGraph:
     """Flatten a MultiDiGraph to a DiGraph by keeping the best edge based on mode-specific travel time."""
     result = nx.DiGraph()
@@ -231,9 +238,10 @@ def build_mode_digraph(graph: nx.MultiDiGraph, mode: str) -> nx.DiGraph:
         safety_val = float(edge_data.get(safety_key, 0.0)) * safety_coef
         
         # Base weight minimizes travel time adjusted by safety risks
+        #計算結合時間與風險值的權重 base_weight = 純通行時間 * (1 + 安全風險值 * 風險係數)
         base_weight = time_value * (1.0 + safety_val)
         
-        if result.has_edge(u, v) and result[u][v]["weight"] <= base_weight:
+        if result.has_edge(u, v) and result[u][v]["weight"] <= base_weight:    #若節點 $u, v$ 間有多條平行邊，僅保留 base_weight 最小（最優）的那一條
             continue
             
         result.add_edge(
@@ -245,7 +253,8 @@ def build_mode_digraph(graph: nx.MultiDiGraph, mode: str) -> nx.DiGraph:
         )
     return result
 
-
+#=====================================================================================================
+#get_filtered_rail_subgraph()：篩選軌道網路。透過 OSM 標籤或路線名稱關鍵字，區隔出「捷運/輕軌 (subway/light_rail)」與「台鐵 (rail)」
 def get_filtered_rail_subgraph(graph: nx.MultiDiGraph, mode: str) -> nx.MultiDiGraph:
     """Return a subgraph of the rail network filtered for either MRT or Train edges."""
     valid_edges = []
@@ -273,6 +282,8 @@ def get_filtered_rail_subgraph(graph: nx.MultiDiGraph, mode: str) -> nx.MultiDiG
                 
     return graph.edge_subgraph(valid_edges).copy()
 
+#==========================================================================================================
+#get_filtered_drive_subgraph()：機車路網過濾器。嚴格剔除台灣機車禁止行駛的國道 (motorway) 與快速道路 (trunk)。
 
 def get_filtered_drive_subgraph(graph: nx.MultiDiGraph, mode: str) -> nx.MultiDiGraph:
     """Return a subgraph of the drive network filtered for Scooter (motorcycle)."""
@@ -291,7 +302,8 @@ def get_filtered_drive_subgraph(graph: nx.MultiDiGraph, mode: str) -> nx.MultiDi
         
     return graph.edge_subgraph(valid_edges).copy()
 
-
+#===================================================================================================
+#prepare_graphs()：介面保留函式。因屬性已預先算好，直接回傳傳入的 graphs 以達到零延遲。
 def prepare_graphs(
     graphs: RoutingGraphs,
     age: int,
@@ -306,7 +318,8 @@ def prepare_graphs(
     # Attribute injections are run once during startup warmups to eliminate request latency
     return graphs
 
-
+#===================================================================================================
+#inject_drive_edges()：為車行網路中的每一條邊注入汽車、機車、計程車與公車的通行時間（秒）與估算票價。依道路等級（如主要幹道 primary、次要幹道 secondary 等）給予修正後的折衷時速
 def inject_drive_edges(graph: nx.MultiDiGraph, identity: str) -> None:
     """Inject car, motorcycle, taxi, and bus time/fare attributes based on highway class."""
     for _, _, _, data in graph.edges(data=True, keys=True):
@@ -372,7 +385,8 @@ def inject_drive_edges(graph: nx.MultiDiGraph, identity: str) -> None:
         data["pure_time_bus"] = seconds_by_speed(length_m, bus_speed)
         data["pure_fare_bus"] = bus_fare(identity)
 
-
+#==============================================================================================
+#inject_rail_edges()：注入捷運與台鐵的行駛時間與票價。
 def inject_rail_edges(graph: nx.MultiDiGraph, identity: str, wait_table: dict) -> None:
     """Inject MRT and train time/fare attributes."""
     for _, _, _, data in graph.edges(data=True, keys=True):
@@ -384,6 +398,8 @@ def inject_rail_edges(graph: nx.MultiDiGraph, identity: str, wait_table: dict) -
         data["pure_time_train"] = seconds_by_speed(length_m, 50.00)
         data["pure_fare_train"] = train_fare(length_km, identity)
 
+#=================================================================================================
+#inject_walk_edges()：計算步行與 YouBike 通行屬性。YouBike 採用指定的基準速度 $12.0\text{ km/h}$（即 $3.33\text{ m/s}$），並呼叫 ubike_fare 計算租借費用。
 
 def inject_walk_edges(
     graph: nx.MultiDiGraph,
@@ -401,7 +417,8 @@ def inject_walk_edges(
         data["pure_fare_walk"] = 0.0
         data["pure_fare_youbike"] = ubike_fare(data["pure_time_youbike"] / 60.0, identity)
 
-
+#===============================================================================
+#seconds_by_speed()：基礎輔助函式，將距離（公尺）與時速（$\text{km/h}$）轉化為通行所需時間（秒）。
 def seconds_by_speed(length_m: float, speed_kmh: float) -> float:
     """Convert edge length and km/h speed to seconds."""
     return length_m / (speed_kmh * 1000 / 3600)
@@ -410,6 +427,7 @@ def seconds_by_speed(length_m: float, speed_kmh: float) -> float:
 # =====================================================================
 # 🛡️ 【使用者自訂區域：安全係數 (環境風險值) 注入與初始化】
 # =====================================================================
+#inject_safety_defaults()：確保圖中每條邊都有預設的安全風險屬性值 0.0，避免在缺失外部安全資料庫時導致路徑權重計算錯誤。
 def inject_safety_defaults(graphs: RoutingGraphs) -> None:
     """
     Preserve safety-cost attributes, using neutral defaults if data is absent.
@@ -427,8 +445,8 @@ def inject_safety_defaults(graphs: RoutingGraphs) -> None:
         data.setdefault("safety_cost_mrt", 0.0)
         data.setdefault("safety_cost_train", 0.0)
 # =====================================================================
-
-
+#build_demo_graphs(), build_demo_graph(), add_demo_shortcuts()：離線單元測試與防護機制（Smoke Test）
+#當無法連接 OSM 伺服器時，自動生成具備經緯度座標、雙向邊與捷向快捷路徑 (shortcuts) 的人工模擬台北圖形，供演算法進行多候選路徑運算測試
 def build_demo_graphs() -> RoutingGraphs:
     """Build a tiny Taipei-shaped fallback graph for local smoke tests."""
     drive = build_demo_graph("drive", 8)
