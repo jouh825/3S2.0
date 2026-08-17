@@ -5,11 +5,11 @@ def mrt_wait_minutes(travel_period: str) -> dict[str, dict[str, float]]:
     peak = travel_period == "上下班尖峰期" or travel_period == "尖峰"
     return {
         "文湖線": {"avg_speed": 32.50, "wait_time": (2.01 / 2) if peak else (4.13 / 2)},
-        "淡水信義線": {"avg_speed": 31.17, "wait_time": (4.14 / 2) if peak else (6.16 / 2)},
-        "松山新店線": {"avg_speed": 31.17, "wait_time": (3.33 / 2) if peak else (6.11 / 2)},
-        "中和新蘆線": {"avg_speed": 31.17, "wait_time": (4.46 / 2) if peak else (7.07 / 2)},
-        "板南線": {"avg_speed": 31.17, "wait_time": (3.24 / 2) if peak else (4.53 / 2)},
-        "預設": {"avg_speed": 31.17, "wait_time": 2.8},
+        "淡水信義線": {"avg_speed": 39.47, "wait_time": (4.14 / 2) if peak else (6.16 / 2)},
+        "松山新店線": {"avg_speed": 39.47, "wait_time": (3.33 / 2) if peak else (6.11 / 2)},
+        "中和新蘆線": {"avg_speed": 39.47, "wait_time": (4.46 / 2) if peak else (7.07 / 2)},
+        "板南線": {"avg_speed": 39.47, "wait_time": (3.24 / 2) if peak else (4.53 / 2)},
+        "預設": {"avg_speed": 39.47, "wait_time": 2.8},
     }
 
 def match_mrt_wait_seconds(edge_data: dict, wait_table: dict[str, dict[str, float]]) -> float:
