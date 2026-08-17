@@ -51,7 +51,7 @@
       <button id="search-btn" class="primary-btn">開始規劃路線</button>
     </div>
 
-    <!-- 右側地圖與成果面板 -->
+    <!-- 右側地圖與成果面板 (解除高度限制) -->
     <div class="map-panel">
       <!-- 地圖區域 -->
       <div id="map"></div>
@@ -63,13 +63,13 @@
           <div id="weather-info" class="weather-box"></div>
         </div>
 
-        <!-- AI 解讀 (限制最高高度 52px，長文於框內輕微滾動) -->
+        <!-- AI 解讀 (自然展開不限制) -->
         <div class="reasoning-box">
           <span class="ai-badge">GEMINI 同理心解讀</span>
           <p id="reasoning">請輸入起終點並點擊規劃按鈕...</p>
         </div>
 
-        <!-- 路線卡片區 -->
+        <!-- 路線卡片區 (完整展示) -->
         <div id="routes-container" class="routes-container"></div>
       </div>
     </div>
