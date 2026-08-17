@@ -1,159 +1,81 @@
-<!doctype html>
-<html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>同理心智慧多模式路線規劃 - 臺北市智慧通勤導遊</title>
-    <!-- Premium Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="/static/style.css" />
-  </head>
-  <body>
-    <!-- Premium light blobs background for glassmorphism layout -->
-    <div class="glass-bg-blobs">
-      <div class="blob blob-1"></div>
-      <div class="blob blob-2"></div>
-      <div class="blob blob-3"></div>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧路線規劃系統</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="glass-bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-shell">
+    <!-- 左側控制面板 -->
+    <div class="glass-panel control-panel">
+      <div class="app-header">
+        <div class="app-logo">🗺️</div>
+        <div>
+          <h1>智慧路線規劃</h1>
+          <p class="subtitle">Smart Route Planner</p>
+        </div>
+      </div>
+
+      <p class="notice">💡 輸入您的起終點與特殊需求，AI 將為您推薦最佳出行方案。</p>
+
+      <div class="card-glass input-group">
+        <h3>📍 行程設定</h3>
+        <label>
+          起點位置
+          <input type="text" id="start-point" placeholder="例如：台北車站">
+        </label>
+        <label style="margin-top: 10px;">
+          目的地
+          <input type="text" id="end-point" placeholder="例如：松山文創園區">
+        </label>
+      </div>
+
+      <div class="card-glass input-group">
+        <h3>💬 AI 需求微調</h3>
+        <label>
+          請描述您的狀況或偏好
+          <textarea id="user-prompt" rows="3" placeholder="例如：今天穿高跟鞋腳痛，希望能少走路..."></textarea>
+        </label>
+      </div>
+
+      <button id="search-btn" class="primary-btn">開始規劃路線</button>
     </div>
 
-    <main class="app-shell">
-      <!-- Left sidebar control panel -->
-      <section class="control-panel glass-panel">
-        <header class="app-header">
-          <div class="app-logo">🗺️</div>
-          <div>
-            <h1>智慧通勤導遊 3.0</h1>
-            <p class="subtitle">Empathetic Route Advisor</p>
-          </div>
-        </header>
+    <!-- 右側地圖與成果面板 -->
+    <div class="map-panel">
+      <!-- 地圖區域 -->
+      <div id="map"></div>
 
-        <p class="notice">
-          📍 目前服務範圍限臺北市。起訖點皆需位於臺北市範圍內。
-        </p>
-
-        <!-- Address input section -->
-        <div class="input-group card-glass">
-          <h3>🚩 行程設定</h3>
-          
-          <div class="address-block">
-            <label for="origin-address">起點位置</label>
-            <div class="search-row">
-              <input id="origin-address" placeholder="例如：台北車站、台北捷運雙連站" />
-              <button class="search-btn" id="origin-search" type="button">搜尋</button>
-            </div>
-            <select id="origin-results" class="result-select" hidden></select>
-            <input id="origin" type="hidden" value="25.047800,121.531900" />
-          </div>
-
-          <div class="address-block">
-            <label for="destination-address">終點位置</label>
-            <div class="search-row">
-              <input id="destination-address" placeholder="例如：台北101、松山車站" />
-              <button class="search-btn" id="destination-search" type="button">搜尋</button>
-            </div>
-            <select id="destination-results" class="result-select" hidden></select>
-            <input id="destination" type="hidden" value="25.033000,121.565400" />
-          </div>
+      <!-- 成果與 AI 說明區 -->
+      <div class="results">
+        <div class="results-header">
+          <h2>🏆 推薦路線 (不同工具排序前 3 名)</h2>
+          <div id="weather-info" class="weather-box"></div>
         </div>
 
-        <!-- Demographic profile section -->
-        <div class="input-group card-glass">
-          <h3>👤 生理基礎</h3>
-          <div class="grid three">
-            <label>生理性別
-              <select id="gender">
-                <option>女性</option>
-                <option>男性</option>
-              </select>
-            </label>
-            <label>年齡
-              <input id="age" type="number" min="0" max="120" value="28" />
-            </label>
-            <label id="weight-label-wrapper">體重 (kg)
-              <input id="weight" type="number" min="1" max="300" value="55" />
-            </label>
-          </div>
-          <label class="inline-check">
-            <input id="private-weight" type="checkbox" />
-            <span>不便透露體重 (使用預設 60kg 計算)</span>
-          </label>
+        <!-- AI 解讀 (已設置最大高度與獨立滾動) -->
+        <div class="reasoning-box">
+          <span class="ai-badge">GEMINI 同理心解讀</span>
+          <p id="reasoning">請輸入起終點並點擊規劃按鈕...</p>
         </div>
 
-        <!-- Vehicle preferences -->
-        <div class="input-group card-glass">
-          <h3>🚇 交通工具選擇</h3>
-          <fieldset class="vehicles-fieldset">
-            <label><input type="checkbox" name="vehicles" value="walking" checked /> 步行</label>
-            <label><input type="checkbox" name="vehicles" value="mrt" checked /> 捷運</label>
-            <label><input type="checkbox" name="vehicles" value="bus" checked /> 公車</label>
-            <label><input type="checkbox" name="vehicles" value="train" checked /> 台鐵</label>
-            <label><input type="checkbox" name="vehicles" value="ubike" checked /> YouBike</label>
-            <label><input type="checkbox" name="vehicles" value="taxi" checked /> 計程車</label>
-            <label><input type="checkbox" name="vehicles" value="car" /> 汽車</label>
-            <label><input type="checkbox" name="vehicles" value="scooter" /> 機車</label>
-          </fieldset>
-        </div>
+        <!-- 路線卡片區 -->
+        <div id="routes-container" class="routes-container"></div>
+      </div>
+    </div>
+  </div>
 
-        <!-- User complaint / free response -->
-        <div class="input-group card-glass">
-          <h3>💬 需求抱怨與描述</h3>
-          <label class="textarea-label">
-            <textarea id="complaint" rows="3" placeholder="例如：今天穿高跟鞋腳好痛，不想走太多路，計程車貴一點沒關係，完全不想爬樓梯。">今天穿高跟鞋腳痛，剛領薪水想對自己好一點，計程車貴一點沒關係，完全不想走太多路。</textarea>
-          </label>
-        </div>
-
-        <!-- Station overlays toggle control (Hidden as overlays are now automated based on results) -->
-        <div class="input-group card-glass" style="display: none;">
-          <h3>🗺️ 地圖圖資疊加</h3>
-          <div class="layers-toggles">
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-mrt" checked />
-              <span class="toggle-label">🚇 捷運站點點位</span>
-            </label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-train" checked />
-              <span class="toggle-label">🚂 火車站點點位</span>
-            </label>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-bus" />
-              <span class="toggle-label">🚌 公車站牌點位 (數量較多)</span>
-            </label>
-          </div>
-        </div>
-
-        <button id="recommend-btn" class="primary-btn">🚀 開始路線推薦</button>
-        <p id="status" class="status-box"></p>
-      </section>
-
-      <!-- Right panel: Map and Results -->
-      <section class="map-panel">
-        <div id="map"></div>
-        
-        <!-- Results drawer -->
-        <section class="results glass-results">
-          <div class="results-header">
-            <h2>🏆 推薦路線 (不同工具排序前 3 名)</h2>
-            <div id="weather-badge" class="weather-badge card-glass-dark">
-              載入即時天氣中...
-            </div>
-          </div>
-          <div class="reasoning-box card-glass" id="reasoning-container" hidden>
-            <span class="ai-badge">Gemini 同理心解讀</span>
-            <p id="reasoning"></p>
-          </div>
-          <div id="routes" class="routes-container"></div>
-        </section>
-      </section>
-    </main>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Custom JavaScript -->
-    <script src="/static/script.js"></script>
-  </body>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="main.js"></script>
+</body>
 </html>
