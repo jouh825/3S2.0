@@ -105,7 +105,7 @@ def _fetch_district_weather_snapshot_uncached(district: str) -> WeatherSnapshot:
     apply_extreme_weather(snapshot)
     return snapshot
 
-
+# 鄉鎮 API 查詢與解析 (query_cwa_town_api & parse_town_weather_elements)
 def query_cwa_town_api(snapshot: WeatherSnapshot, api_key: str, district: str) -> bool:
     """
     Query CWA F-D0047-089 Town Weather API to extract weather variables for a given district.
@@ -161,7 +161,7 @@ def parse_town_weather_elements(snapshot: WeatherSnapshot, elements: List[Dict])
         except Exception:
             pass
 
-
+#基礎觀測站與環境部 AQI 查詢 - 向 O-A0001-001 (自動氣象站觀測資料) 查詢台北主要觀測站（如台北站 466920），過濾掉異常值（如 -999.0 表示儀器故障），計算全台北市平均氣溫、風速與累積雨量。
 def get_cwa_base_observation(api_key: str) -> tuple:
     """Fetch CWA station observations to calculate Taipei average baseline weather."""
     station_ids = "466920,C0A980,C0A9C0,C0A9F0,C0AC70"
@@ -197,7 +197,7 @@ def get_cwa_base_observation(api_key: str) -> tuple:
         pass
     return 28.5, 2.0, 0.0, "晴"
 
-
+#基礎觀測站與環境部 AQI 查詢 - 向 F-C0032-001 查詢台北市整體 PoP 降雨機率預報
 def get_cwa_base_forecast(api_key: str) -> float:
     """Fetch base rain probability forecast for Taipei City."""
     url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001"
@@ -212,7 +212,7 @@ def get_cwa_base_forecast(api_key: str) -> float:
         pass
     return 20.0
 
-
+#向環境部 API（頻道 aqx_p_432 / aqx_p_434）取得台北市監測站的 AQI 數值並取平均
 def get_moenv_base_aqi(api_key: str) -> float:
     """Fetch base AQI average value for Taipei City."""
     channels = ["aqx_p_432", "aqx_p_434"]
