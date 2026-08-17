@@ -240,17 +240,21 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
 }
 
-/* --- 地圖與成果面板比例調大調整 --- */
+/* ============================================================
+   重點修正區：解決卡片被切到、需要手動下拉的問題
+   ============================================================ */
 .map-panel {
-  display: grid;
-  /* 將地圖比例縮小為 48vh，讓成果格區塊放大到 52vh */
-  grid-template-rows: 48vh minmax(360px, 1fr);
+  display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow-y: auto; /* 允許全頁彈性滾動 */
 }
 
 #map {
   width: 100%;
-  height: 100%;
+  height: 250px; /* 大幅降低地圖高度，把畫面主要空間留給卡片 */
+  min-height: 250px;
+  flex-shrink: 0;
   border-bottom: 1px solid rgba(2, 132, 199, 0.15);
 }
 
@@ -258,11 +262,11 @@ input:focus, select:focus, textarea:focus {
   background: rgba(240, 248, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 20px 24px;
-  overflow-y: auto;
+  padding: 14px 20px; /* 縮減內邊距節省垂直空間 */
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
+  flex-grow: 1;
 }
 
 .results-header {
@@ -272,46 +276,52 @@ input:focus, select:focus, textarea:focus {
 }
 
 .results h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
 }
 
+.weather-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
 .reasoning-box {
-  padding: 14px 16px;
+  padding: 10px 14px;
   position: relative;
-  border-left: 4px solid var(--accent-color);
-  margin-bottom: 4px;
+  border-left: 3.5px solid var(--accent-color);
+  margin-bottom: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0 8px 8px 0;
 }
 
 .ai-badge {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--accent-color);
-  background: rgba(2, 132, 199, 0.1);
-  padding: 3px 6px;
+  background: rgba(2, 132, 199, 0.12);
+  padding: 2px 6px;
   border-radius: 4px;
   position: absolute;
-  top: -10px;
-  left: 16px;
-  border: 1px solid rgba(2, 132, 199, 0.15);
+  top: -8px;
+  left: 12px;
+  border: 1px solid rgba(2, 132, 199, 0.2);
 }
 
 #reasoning {
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 2px 0 0;
   font-weight: 500;
   color: var(--primary-dark);
 }
 
-/* --- 路線卡片寬度與字體微調 --- */
 .routes-container {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -319,18 +329,18 @@ input:focus, select:focus, textarea:focus {
   background: #ffffff;
   border: 1px solid rgba(2, 132, 199, 0.15);
   border-radius: var(--border-radius-lg);
-  padding: 16px 12px;
-  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.05);
+  padding: 12px 10px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   box-sizing: border-box;
 }
 
 .route-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.12);
 }
 
 .route-title {
@@ -338,15 +348,15 @@ input:focus, select:focus, textarea:focus {
   justify-content: space-between;
   align-items: center;
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--primary-color);
   border-bottom: 1px solid rgba(2, 132, 199, 0.1);
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   white-space: nowrap;
 }
 
 .route-duration {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--accent-color);
   white-space: nowrap;
@@ -355,13 +365,13 @@ input:focus, select:focus, textarea:focus {
 .route-details {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .route-detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -375,7 +385,7 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 130px;
+  max-width: 120px;
 }
 
 /* Custom Transit Station Markers */
