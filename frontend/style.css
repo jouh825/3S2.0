@@ -217,9 +217,7 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
 }
 
-/* ============================================================
-   右側畫面配置 (精準控制高度，確保免下拉)
-   ============================================================ */
+/* 右側畫面配置 (絕對壓低高度，完全免下拉) */
 .map-panel {
   display: flex;
   flex-direction: column;
@@ -227,21 +225,19 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
 }
 
-/* 1. 精簡地圖高度 */
 #map {
   width: 100%;
-  height: 220px;
+  height: 200px;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(2, 132, 199, 0.15);
 }
 
-/* 2. 成果容納區 */
 .results {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 12px 18px;
-  gap: 8px;
+  padding: 10px 16px;
+  gap: 6px;
   background: rgba(240, 248, 255, 0.85);
   overflow: hidden;
 }
@@ -259,14 +255,14 @@ input:focus, select:focus, textarea:focus {
   margin: 0;
 }
 
-/* 3. AI 解讀框 (最高限制 85px，長文自動出現內部小捲軸) */
+/* AI 解讀框鎖定 52px */
 .reasoning-box {
-  padding: 8px 12px;
+  padding: 6px 10px;
   position: relative;
   border-left: 3.5px solid var(--accent-color);
   background: rgba(255, 255, 255, 0.65);
   border-radius: 0 8px 8px 0;
-  max-height: 85px;
+  max-height: 52px;
   overflow-y: auto;
   flex-shrink: 0;
 }
@@ -286,19 +282,19 @@ input:focus, select:focus, textarea:focus {
 }
 
 #reasoning {
-  font-size: 12.5px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.4;
   margin: 0;
   color: var(--primary-dark);
-  padding-right: 90px; /* 避開右上角標籤 */
+  padding-right: 90px;
 }
 
-/* 4. 路線卡片區 (填滿下方剩餘空間) */
+/* 卡片緊湊呈現 */
 .routes-container {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   align-items: start;
 }
@@ -307,11 +303,12 @@ input:focus, select:focus, textarea:focus {
   background: #ffffff;
   border: 1px solid rgba(2, 132, 199, 0.15);
   border-radius: 12px;
-  padding: 10px;
+  padding: 8px 10px;
   box-shadow: 0 2px 8px rgba(2, 132, 199, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  box-sizing: border-box;
 }
 
 .route-card:hover {
@@ -324,14 +321,14 @@ input:focus, select:focus, textarea:focus {
   justify-content: space-between;
   align-items: center;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--primary-color);
   border-bottom: 1px solid rgba(2, 132, 199, 0.1);
   padding-bottom: 4px;
 }
 
 .route-duration {
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--accent-color);
 }
@@ -339,13 +336,13 @@ input:focus, select:focus, textarea:focus {
 .route-details {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .route-detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
 }
 
