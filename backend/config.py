@@ -7,11 +7,19 @@ from functools import lru_cache
 # 輔助函式：自動從 Streamlit Secrets 或 環境變數 抓取金鑰
 # ==========================================
 def get_secret(key_name):
-    # 優先從 Streamlit Secrets 讀取 (若執行在 Streamlit Cloud)
-    if st.secrets and key_name in st.secrets:
-        return st.secrets[key_name]
-    # 若不是 Streamlit 或找不到，則從環境變數讀取
-    return os.environ.get(key_name)
+    # 1. 優先讀取 Render / 系統環境變數 (Environment Variables)
+    val = os.environ.get(key_name)
+    if val:
+        return val
+    
+    # 2. 如果環境變數沒有，再嘗試讀取 Streamlit 的 secrets.toml (本機開發時)
+    try:
+        if hasattr(st, "secrets") and key_name in st.secrets:
+            return st.secrets[key_name]
+    except Exception:
+        pass
+        
+    return None
 
 # ==========================================
 # 1. API 金鑰設定
