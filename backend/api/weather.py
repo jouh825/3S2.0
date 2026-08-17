@@ -6,6 +6,7 @@ import requests
 from typing import Optional, List, Dict
 from backend.config import WEATHER_API_KEY, MOENV_API_KEY
 
+#WeatherSnapshot：封裝單一行政區的所有環境指標（溫度、風速、AQI、警報標籤等
 @dataclass
 class WeatherSnapshot:
     """Taipei district environmental snapshot."""
@@ -18,6 +19,9 @@ class WeatherSnapshot:
     wind_speed: Optional[float] = None
     extreme_weather_alert: str = "正常"
     heat_warning_level: Optional[str] = None
+    # 🆕 新增資料品質/來源標記
+    is_realtime: bool = True               # 是否為即時資料
+    data_source: str = "CWA_TOWN_API"      # 可選值：CWA_TOWN_API / MICROCLIMATE_MOCK / GLOBAL_FALLBACK
 
 
 def fetch_weather_snapshot() -> WeatherSnapshot:
@@ -27,7 +31,7 @@ def fetch_weather_snapshot() -> WeatherSnapshot:
     """
     return fetch_district_weather_snapshot("臺北市")
 
-
+#利用字典安行政區名稱做記憶體快取，並設定10分鐘為快取效期，避免頻繁發送api導致被氣象署限劉
 _WEATHER_CACHE: Dict[str, tuple[float, WeatherSnapshot]] = {}
 CACHE_TTL_SECONDS = 600.0  # 10 minutes cache
 
@@ -47,6 +51,7 @@ def fetch_district_weather_snapshot(district: str) -> WeatherSnapshot:
     _WEATHER_CACHE[district] = (now, snapshot)
     return snapshot
 
+#三層式資料抓取與模擬機制
 def _fetch_district_weather_snapshot_uncached(district: str) -> WeatherSnapshot:
     """Actual network fetch or microclimate mock fallback."""
     snapshot = WeatherSnapshot(district=district)
@@ -72,8 +77,15 @@ def _fetch_district_weather_snapshot_uncached(district: str) -> WeatherSnapshot:
     if WEATHER_API_KEY and district != "臺北市" and district != "境外":
         cwa_success = query_cwa_town_api(snapshot, WEATHER_API_KEY, district)
 
-    # 3. 若 CWA 鄉鎮 API 呼叫失敗或無 key，使用學術微氣候偏移量 (Microclimate Offset) 進行模擬
-    if not cwa_success:
+    # 3. 狀態標記與備援降級機制 (Graceful Degradation)
+    if cwa_success:
+        snapshot.is_realtime = True
+        snapshot.data_source = "CWA_TOWN_API"
+    else:
+        # 當 CWA 鄉鎮 API 失敗或無 Key 時，標記為非即時數據，啟動學術微氣候模型/預設備援 進行模擬
+        snapshot.is_realtime = False
+        snapshot.data_source = "MICROCLIMATE_MOCK" if WEATHER_API_KEY else "DEFAULT_FALLBACK"
+
         # 溫度與空氣品質偏移量 (Urban heat island & vegetation cooling)
         offset = (hash(district) % 7) / 10.0
         aqi_offset = hash(district) % 9 - 4
@@ -229,7 +241,7 @@ def get_moenv_base_aqi(api_key: str) -> float:
             continue
     return 35.0
 
-
+#警報與極端天氣判定
 def apply_extreme_weather(snapshot: WeatherSnapshot) -> None:
     """Apply the notebook's heat, rain, and wind alert thresholds."""
     if snapshot.temperature is not None:
