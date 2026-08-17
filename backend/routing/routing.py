@@ -1,5 +1,5 @@
 """NetworkX routing engine."""
-
+#模組載入、對照表與資料結構(imports & global mappings)
 from dataclasses import dataclass
 from typing import Any, List, Dict
 import networkx as nx
@@ -10,6 +10,7 @@ from backend.api.weather import WeatherSnapshot
 from backend.routing.walking_speed import calculate_walk_speed, fare_identity
 from backend.routing.fare import mrt_fare, train_fare, bus_fare, taxi_fare, ubike_fare
 
+#VEHICLE_MODES 字典：將運具名稱映射到 (基礎圖形類型, 運具模式) 的二元組。例如 ubike 會使用 walk（人行網）作為基底，運具模式為 youbike
 VEHICLE_MODES = {
     "walking": ("walk", "walk"),
     "walk": ("walk", "walk"),
@@ -24,6 +25,8 @@ VEHICLE_MODES = {
     "taxi": ("drive", "taxi"),
 }
 
+#RouteRequestData 資料類別：封裝單次請求的所有輸入參數（起終點、個人特徵、允許運具、AI 分析結果與天氣）。
+#_GRAPHS 全域變數：全域的圖形快取記憶體（快取指標），確保伺服器運行期間只會在記憶體中載入一次 RoutingGraphs，避免每次算路都重新初始化。
 @dataclass
 class RouteRequestData:
     """Routing data passed from FastAPI into the engine."""
@@ -39,7 +42,8 @@ class RouteRequestData:
 
 _GRAPHS: RoutingGraphs | None = None
 
-
+#recommend_routes()：最終提供給 API 的推薦入口。取得準備好的圖形。遍歷使用者允許的所有運具（allowed_vehicles）。
+#對每一種運具算路，並只挑選該運具表現最好的第 1 名路線（確保不會推薦重複運具的路線）。最後將各運具的最優路線依照「AI 調整後的時間 (adjusted_time_seconds)」由低到高排序，回傳前 3 名最佳方案。
 def recommend_routes(data: RouteRequestData) -> List[Dict[str, Any]]:
     """
     Return the top three NetworkX routes after applying AI weights.
@@ -57,7 +61,8 @@ def recommend_routes(data: RouteRequestData) -> List[Dict[str, Any]]:
     candidates_by_mode.sort(key=lambda item: item["adjusted_time_seconds"])
     return candidates_by_mode[:3]
 
-
+#get_prepared_graphs()：Singleton 模式的圖形取得器。若全域變數 _GRAPHS 為空則觸發 build_graphs() 載入圖形
+#並將 AI 產出的步行速度倍率與氣象風速傳入 prepare_graphs 進行設定
 def get_prepared_graphs(data: RouteRequestData) -> RoutingGraphs:
     """Load graphs once, then apply per-request formulas."""
     global _GRAPHS
@@ -76,7 +81,6 @@ def get_prepared_graphs(data: RouteRequestData) -> RoutingGraphs:
         settings.default_travel_period,
         wind_speed=data.weather.wind_speed or 2.5,
     )
-
 
 def allowed_vehicles(data: RouteRequestData) -> List[str]:
     """Apply user-selected vehicles and Gemini banned vehicle filtering."""
@@ -142,7 +146,7 @@ def normalize_vehicle(vehicle: str) -> str:
     mapping.update({"train": "train", "car": "car", "taxi": "taxi"})
     return mapping.get(vehicle.lower(), vehicle.lower())
 
-
+#mode_weight()：從 AI 回傳的結果中讀取該運具的權重（偏好倍率），預設值為 1.0
 def mode_weight(vehicle: str, ai: dict[str, Any]) -> float:
     """Return Gemini weight for a vehicle."""
     weights = ai.get("weights", {})
@@ -158,7 +162,6 @@ def shortest_paths(graph: nx.DiGraph, source: int, target: int, count: int) -> L
     except Exception as e:
         print(f"[Error in shortest_paths] from {source} to {target}: {e}")
         return []
-
 
 def summarize_path(
     graph: nx.DiGraph,
@@ -242,7 +245,7 @@ def summarize_path(
     payload["alight_station"] = alight_st
     return payload
 
-
+#資料輸出結構與空間定位 (Payload & GIS Helpers)
 def route_payload(rank: int, vehicle: str, totals: dict[str, float], coordinates: List[List[float]]) -> dict:
     """Build API route payload."""
     return {
@@ -256,7 +259,7 @@ def route_payload(rank: int, vehicle: str, totals: dict[str, float], coordinates
         "coordinates": coordinates,
     }
 
-
+#nearest_node()：尋找座標點對應在地圖圖形中最接近的節點 ID。優先使用 osmnx 的高效率 KD-Tree 演算法；若失敗則降級使用平方式距離（squared_distance）進行全域搜尋
 def nearest_node(graph: nx.DiGraph, place: str) -> int:
     """Find nearest graph node from 'lat,lon' or a geocoded place string."""
     if not graph or graph.number_of_nodes() == 0:
@@ -267,7 +270,6 @@ def nearest_node(graph: nx.DiGraph, place: str) -> int:
         return int(ox.nearest_nodes(graph, X=lon, Y=lat))
     except Exception:
         return min(graph.nodes, key=lambda node: squared_distance(graph.nodes[node], lat, lon))
-
 
 def parse_place(place: str) -> tuple[float, float]:
     """Parse coordinates or geocode a text place."""
