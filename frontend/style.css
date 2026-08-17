@@ -34,7 +34,6 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  overflow-x: hidden;
   background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 50%, #dbeafe 100%);
   position: relative;
 }
@@ -104,6 +103,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
 }
 
 .app-header {
@@ -217,29 +219,28 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
 }
 
-/* 右側畫面配置 (絕對壓低高度，完全免下拉) */
+/* ============================================================
+   右側區域：完全解除高度壓制，讓內容自然展開
+   ============================================================ */
 .map-panel {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 #map {
   width: 100%;
-  height: 200px;
+  height: 260px;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(2, 132, 199, 0.15);
 }
 
 .results {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 10px 16px;
-  gap: 6px;
+  padding: 16px 20px 40px; /* 下方留空 40px，保證不貼底 */
+  gap: 12px;
   background: rgba(240, 248, 255, 0.85);
-  overflow: hidden;
 }
 
 .results-header {
@@ -249,71 +250,64 @@ input:focus, select:focus, textarea:focus {
 }
 
 .results h2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
 }
 
-/* AI 解讀框鎖定 52px */
+/* AI 解讀框：自然伸展，不裁切文字 */
 .reasoning-box {
-  padding: 6px 10px;
+  padding: 10px 14px;
   position: relative;
-  border-left: 3.5px solid var(--accent-color);
+  border-left: 4px solid var(--accent-color);
   background: rgba(255, 255, 255, 0.65);
   border-radius: 0 8px 8px 0;
-  max-height: 52px;
-  overflow-y: auto;
-  flex-shrink: 0;
 }
 
 .ai-badge {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--accent-color);
   background: rgba(2, 132, 199, 0.12);
   padding: 2px 6px;
   border-radius: 4px;
-  position: absolute;
-  top: 4px;
-  right: 8px;
+  display: inline-block;
+  margin-bottom: 6px;
   border: 1px solid rgba(2, 132, 199, 0.2);
 }
 
 #reasoning {
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
   margin: 0;
   color: var(--primary-dark);
-  padding-right: 90px;
 }
 
-/* 卡片緊湊呈現 */
+/* 路線卡片區：完整高質感呈現，不設任何最大高度限制 */
 .routes-container {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
   width: 100%;
-  align-items: start;
+  margin-top: 6px;
 }
 
 .route-card {
   background: #ffffff;
-  border: 1px solid rgba(2, 132, 199, 0.15);
+  border: 1px solid rgba(2, 132, 199, 0.18);
   border-radius: 12px;
-  padding: 8px 10px;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.05);
+  padding: 12px 14px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  box-sizing: border-box;
+  gap: 8px;
 }
 
 .route-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.12);
 }
 
 .route-title {
@@ -321,14 +315,14 @@ input:focus, select:focus, textarea:focus {
   justify-content: space-between;
   align-items: center;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--primary-color);
   border-bottom: 1px solid rgba(2, 132, 199, 0.1);
-  padding-bottom: 4px;
+  padding-bottom: 6px;
 }
 
 .route-duration {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--accent-color);
 }
@@ -336,13 +330,13 @@ input:focus, select:focus, textarea:focus {
 .route-details {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
 }
 
 .route-detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -356,5 +350,5 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 110px;
+  max-width: 120px;
 }
