@@ -6,7 +6,6 @@
   --text-main: #1e293b;
   --text-muted: #64748b;
   
-  /* Light Blue Glassmorphism styling variables */
   --glass-bg: rgba(255, 255, 255, 0.45);
   --glass-bg-hover: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.45);
@@ -40,7 +39,6 @@ body {
   position: relative;
 }
 
-/* Background animated-like light blobs for glassmorphism setup */
 .glass-bg-blobs {
   position: absolute;
   top: 0;
@@ -87,7 +85,7 @@ body {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 450px minmax(0, 1fr);
+  grid-template-columns: 420px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -101,7 +99,7 @@ body {
 }
 
 .control-panel {
-  padding: 28px 24px;
+  padding: 24px 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -142,7 +140,6 @@ h1 {
   letter-spacing: 1px;
 }
 
-/* Alert notice block */
 .notice {
   border: 1px solid rgba(14, 165, 233, 0.25);
   background: rgba(224, 242, 254, 0.5);
@@ -156,7 +153,6 @@ h1 {
   font-weight: 500;
 }
 
-/* Input elements styling */
 .card-glass {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -189,9 +185,7 @@ label {
   color: var(--text-main);
 }
 
-input,
-select,
-textarea {
+input, select, textarea {
   width: 100%;
   border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: var(--border-radius-md);
@@ -202,24 +196,10 @@ textarea {
   outline: none;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   border-color: var(--accent-color);
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
-}
-
-textarea {
-  resize: vertical;
-  font-family: inherit;
-}
-
-.address-block {
-  margin-bottom: 12px;
-}
-.address-block:last-child {
-  margin-bottom: 0;
 }
 
 .search-row {
@@ -229,7 +209,6 @@ textarea {
   margin-top: 6px;
 }
 
-/* Buttons style */
 .search-btn {
   background: rgba(2, 132, 199, 0.1);
   color: var(--accent-color);
@@ -246,113 +225,6 @@ textarea {
   border-color: var(--accent-color);
 }
 
-.result-select {
-  margin-top: 8px;
-  font-size: 13px;
-}
-
-.grid {
-  display: grid;
-  gap: 12px;
-}
-
-.three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.inline-check {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 0;
-  cursor: pointer;
-}
-
-.inline-check input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.inline-check span {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-/* Checkboxes and overlays layout */
-.vehicles-fieldset {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.vehicles-fieldset label {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(59, 130, 246, 0.08);
-  border-radius: var(--border-radius-md);
-}
-
-.vehicles-fieldset label:hover {
-  background: #ffffff;
-  border-color: rgba(2, 132, 199, 0.2);
-}
-
-.vehicles-fieldset input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.layers-toggles {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.toggle-switch {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(59, 130, 246, 0.08);
-  border-radius: var(--border-radius-md);
-}
-
-.toggle-switch:hover {
-  background: #ffffff;
-  border-color: rgba(2, 132, 199, 0.2);
-}
-
-.toggle-switch input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
-}
-
-.toggle-label {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-/* Primary Button style */
 .primary-btn {
   background: linear-gradient(135deg, var(--accent-color) 0%, #0284c7 100%);
   color: #ffffff;
@@ -368,36 +240,11 @@ textarea {
   justify-content: center;
 }
 
-.primary-btn:hover {
-  background: linear-gradient(135deg, var(--accent-hover) 0%, #0369a1 100%);
-  transform: translateY(-1.5px);
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
-}
-
-.primary-btn:active {
-  transform: translateY(0);
-}
-
-.primary-btn:disabled {
-  background: #cbd5e1;
-  color: #94a3b8;
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.status-box {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--accent-color);
-  text-align: center;
-}
-
-/* Map panel grid */
+/* --- 地圖與成果面板比例調大調整 --- */
 .map-panel {
   display: grid;
-  grid-template-rows: minmax(360px, 60vh) minmax(260px, 1fr);
+  /* 將地圖比例縮小為 48vh，讓成果格區塊放大到 52vh */
+  grid-template-rows: 48vh minmax(360px, 1fr);
   height: 100vh;
 }
 
@@ -408,10 +255,10 @@ textarea {
 }
 
 .results {
-  background: rgba(240, 248, 255, 0.6);
+  background: rgba(240, 248, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 24px;
+  padding: 20px 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -422,7 +269,6 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
 }
 
 .results h2 {
@@ -432,22 +278,11 @@ textarea {
   margin: 0;
 }
 
-.weather-badge {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: var(--border-radius-md);
-  color: #0369a1;
-  background: rgba(224, 242, 254, 0.6);
-  border: 1px solid rgba(14, 165, 233, 0.2);
-}
-
-/* Empathy Reasoning Box */
 .reasoning-box {
-  padding: 16px;
+  padding: 14px 16px;
   position: relative;
   border-left: 4px solid var(--accent-color);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .ai-badge {
@@ -465,65 +300,68 @@ textarea {
 }
 
 #reasoning {
-  font-size: 14.5px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.5;
   margin: 4px 0 0;
   font-weight: 500;
   color: var(--primary-dark);
 }
 
-/* Route recommendation cards */
+/* --- 路線卡片寬度與字體微調 --- */
 .routes-container {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
+  width: 100%;
 }
 
 .route-card {
   background: #ffffff;
-  border: 1px solid rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(2, 132, 199, 0.15);
   border-radius: var(--border-radius-lg);
-  padding: 18px;
-  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.03);
+  padding: 16px 12px;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .route-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(2, 132, 199, 0.1);
-  border-color: rgba(2, 132, 199, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12);
 }
 
 .route-title {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 750;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 13.5px;
   color: var(--primary-color);
   border-bottom: 1px solid rgba(2, 132, 199, 0.1);
-  padding-bottom: 8px;
+  padding-bottom: 6px;
+  white-space: nowrap;
 }
 
 .route-duration {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--accent-color);
+  white-space: nowrap;
 }
 
 .route-details {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin: 0;
 }
 
 .route-detail-row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
 }
 
@@ -534,38 +372,10 @@ textarea {
 .detail-val {
   color: var(--text-main);
   font-weight: 600;
-}
-
-/* Responsive styles */
-@media (max-width: 1024px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-  }
-  
-  .control-panel {
-    border-right: 0;
-    max-height: 550px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  
-  .map-panel {
-    grid-template-rows: 400px minmax(300px, 1fr);
-    height: auto;
-  }
-  
-  .routes-container {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .three,
-  .search-row {
-    grid-template-columns: 1fr;
-  }
-  .vehicles-fieldset {
-    grid-template-columns: 1fr;
-  }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
 }
 
 /* Custom Transit Station Markers */
@@ -581,56 +391,10 @@ textarea {
   border: 2.5px solid #0284c7;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-.board-marker {
-  border-color: #10b981; /* Green border for boarding */
-}
-.alight-marker {
-  border-color: #ef4444; /* Red border for alighting */
-}
+.board-marker { border-color: #10b981; }
+.alight-marker { border-color: #ef4444; }
 
-/* Map Legend Control Style */
-.map-legend {
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(2, 132, 199, 0.15);
-  border-radius: var(--border-radius-md);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-family: 'Noto Sans TC', sans-serif;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--primary-dark);
-}
-.map-legend h4 {
-  margin: 0 0 6px 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary-color);
-  border-bottom: 1px solid rgba(2, 132, 199, 0.1);
-  padding-bottom: 4px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 3px;
-}
-.legend-line {
-  width: 22px;
-  height: 5px;
-  border-radius: 2px;
-}
-.legend-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Fix Leaflet DivIcon default background and border box overlay */
-.custom-div-icon,
-.transit-station-icon {
+.custom-div-icon, .transit-station-icon {
   background: transparent !important;
   border: none !important;
 }
