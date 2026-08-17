@@ -76,10 +76,9 @@ def _fetch_district_weather_snapshot_uncached(district: str) -> WeatherSnapshot:
     cwa_success = False
     if WEATHER_API_KEY and district != "臺北市" and district != "境外":
         cwa_success = query_cwa_town_api(snapshot, WEATHER_API_KEY, district)
-
-    # 3. 狀態標記與備援降級機制 (Graceful Degradation)
+   # 3. 狀態標記與備援降級機制 (Graceful Degradation)
     if cwa_success:
-        snapshot.is_realtime = True
+       snapshot.is_realtime = True
         snapshot.data_source = "CWA_TOWN_API"
     else:
         # 當 CWA 鄉鎮 API 失敗或無 Key 時，標記為非即時數據，啟動學術微氣候模型/預設備援 進行模擬
