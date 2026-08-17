@@ -284,7 +284,11 @@ function drawSelectedMarkers() {
         iconSize: [14, 14],
         iconAnchor: [7, 7]
       })
-    }).bindPopup(label).addTo(markerLayer);
+    })
+    // 起終點標記也同步加入浮現提示 (bindTooltip)
+    .bindTooltip(label, { permanent: false, direction: 'top', offset: [0, -8] })
+    .bindPopup(label)
+    .addTo(markerLayer);
   });
 }
 
@@ -469,14 +473,15 @@ function renderRoute(route, index, container, bounds) {
   container.insertAdjacentHTML("beforeend", routeCard(route, color, index + 1));
 }
 
+// 核心修改處：將 bindPopup 改為 bindTooltip，使滑鼠懸停（Hover）時站點名稱自動浮現！
 function drawRouteStation(st, type, vehicle) {
   const iconHtml = type === "board" 
     ? '<div class="station-marker board-marker">🚇</div>' 
     : '<div class="station-marker alight-marker">🛑</div>';
     
-  const popupText = type === "board"
-    ? `<b>🟢 乘車站點 (${vehicleLabel(vehicle)})：${st.name}</b>`
-    : `<b>🔴 下車站點 (${vehicleLabel(vehicle)})：${st.name}</b>`;
+  const stationLabel = type === "board"
+    ? `🟢 乘車站點 (${vehicleLabel(vehicle)})：${st.name}`
+    : `🔴 下車站點 (${vehicleLabel(vehicle)})：${st.name}`;
     
   const marker = L.marker([st.lat, st.lon], {
     icon: L.divIcon({
@@ -485,7 +490,16 @@ function drawRouteStation(st, type, vehicle) {
       iconSize: [24, 24],
       iconAnchor: [12, 12]
     })
-  }).bindPopup(popupText);
+  })
+  // 1. 滑鼠移上去時自動浮現站名提示框
+  .bindTooltip(stationLabel, {
+    permanent: false, // 設為 false：滑鼠移上去自動浮現；若想直接固定顯示在畫面上可改為 true
+    direction: 'top',
+    offset: [0, -12],
+    opacity: 0.95
+  })
+  // 2. 點擊時依然保留詳細氣泡視窗
+  .bindPopup(`<b>${stationLabel}</b>`);
   
   if (vehicle === "mrt") {
     marker.addTo(mrtLayer);
