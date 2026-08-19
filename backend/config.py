@@ -1,17 +1,40 @@
 import os
-import streamlit as st  # 匯入 streamlit 以讀取雲端 Secrets
+import tomllib  # Python 3.11+ 內建，若為舊版可自動降級處理
 from pathlib import Path
 from functools import lru_cache
+import streamlit as st  # 匯入 streamlit 以讀取雲端 Secrets
 
 # ==========================================
-# 輔助函式：自動從 Streamlit Secrets 或 環境變數 抓取金鑰
+# 專案根目錄與 secrets.toml 定位
+# ==========================================
+# BASE_DIR 定位為 C:\3s\ (即 backend 的上一層)
+BASE_DIR = Path(__file__).resolve().parent.parent
+SECRETS_FILE = BASE_DIR / ".streamlit" / "secrets.toml"
+
+# ==========================================
+# 輔助函式：自動從 Streamlit Secrets、實體檔案 或 環境變數 抓取金鑰
 # ==========================================
 def get_secret(key_name):
-    # 優先從 Streamlit Secrets 讀取 (若執行在 Streamlit Cloud)
-    if st.secrets and key_name in st.secrets:
-        return st.secrets[key_name]
-    # 若不是 Streamlit 或找不到，則從環境變數讀取
+    # 1. 優先嘗試由 Streamlit 原生 Secrets 讀取 (適用於 Streamlit Cloud)
+    try:
+        if hasattr(st, "secrets") and key_name in st.secrets:
+            return st.secrets[key_name]
+    except Exception:
+        pass
+
+    # 2. 做法 B：若 Streamlit 原生機制報錯/找不到，強制依照專案絕對路徑讀取 secrets.toml
+    if SECRETS_FILE.exists():
+        try:
+            with open(SECRETS_FILE, "rb") as f:
+                secrets_data = tomllib.load(f)
+                if key_name in secrets_data:
+                    return secrets_data[key_name]
+        except Exception as e:
+            print(f"[Warning] 讀取 {SECRETS_FILE} 發生錯誤: {e}")
+
+    # 3. 降級備案：從系統環境變數讀取
     return os.environ.get(key_name)
+
 # ==========================================
 # 1. API 金鑰設定
 # ==========================================
@@ -35,7 +58,6 @@ GEMINI_MODEL_NAME = get_secret("GEMINI_MODEL") or "gemini-3.5-flash"
 # ==========================================
 # 3. 專案路徑設定
 # ==========================================
-BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "backend" / "data"
 GRAPH_CACHE_DIR = DATA_DIR / "graphs"
 
