@@ -13,7 +13,7 @@ from backend.routing.graph import build_graphs  #build_graphs：載入路網圖�
 from backend.routing.routing import RouteRequestData, recommend_routes, parse_place  #RouteRequestData, recommend_routes, parse_place：路徑規劃資料結構與核心推薦演算法
 from backend.ai.gemini import get_gemini_weights   #get_gemini_weights：呼叫gemini將使用者心情轉換為路徑選擇的權重
 from backend.api.weather import fetch_district_weather_snapshot, WeatherSnapshot   #fetch_district_weather_snapshot, WeatherSnapshot：抓取特定行政區氣象及空氣品質資料
-from backend.utils.gis_helperget_all_stations, get_taipei_boundary_coords, get_district_by_coords
+from backend.utils.gis_helper import get_all_stations, get_taipei_boundary_coords, get_district_by_coords
 # import get_all_stations, get_taipei_boundary_coords, get_district_by_coords：GIS 工具，用來取得車站清單、台北市邊界座標，以及根據經緯度查詢所屬行政區
 
 # Set page config 網頁基本設定與CSS(控制網頁外觀與排版的電腦語言)樣式美化
